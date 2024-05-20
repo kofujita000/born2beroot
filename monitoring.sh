@@ -1,46 +1,5 @@
 #!/bin/bash
 
-# apt を設定するためのコマンド
-echo "deb http://deb.debian.org/debian/ bookworm main non-free" > "/etc/apt/sources.list"
-
-# パッケージマネージャをアップデートする
-apt update
-apt install -y ssh sudo ufw libpam-pwquality bc sysstat net-tools
-
-# sudo の設定を行う
-# ${USER} => ユーザ名に変更してください
-usermod -aG sudo ${USER}
-touch /etc/sudoers.d/sudo_config
-mkdir -p /var/log/sudo
-echo -e "Defaults\tpasswd_tries=3" > /etc/sudoers.d/sudo_config
-echo -e "Defaults\tbadpass_message=\"Oh...????\"" >> /etc/sudoers.d/sudo_config
-echo -e "Defaults\tlogfile=\"/var/log/sudo/sudo_config\"" >> /etc/sudoers.d/sudo_config
-echo -e "Defaults\tlog_input, log_output" >> /etc/sudoers.d/sudo_config
-echo -e "Defaults\tiolog_dir=\"/var/log/sudo\"" >> /etc/sudoers.d/sudo_config
-echo -e "Defaults\trequiretty" >> /etc/sudoers.d/sudo_config
-echo -e "Defaults\tsecure_path=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin\"" >> /etc/sudoers.d/sudo_config
-
-# ssh の設定を行う
-sed -ie "s/#Port 22/Port 4242/g" /etc/ssh/sshd_config
-sed -ie "s/#PermitRootLogin prohibit-password/PermitRootLogin no/g" /etc/ssh/sshd_config
-sed -ie "s/#Port/Port 4242/g" /etc/ssh/ssh_config
-systemctl restart ssh
-
-# ufw の設定を行う
-sudo ufw enable
-sudo ufw allow 4242
-sudo ufw status numbered
-
-# パスワードポリシの設定
-sed -ie "s/PASS_MAX_DAYS/PASS_MAX_DAYS\t30/g" /etc/login.defs
-sed -ie "s/PASS_MIN_DAYS/PASS_MIN_DAYS\t2/g" /etc/login.defs
-sed -ie "s/^password\trequisite/password\trequisite\t\t\tpam_pwquality.so retry=3 minlen=10 ucredit=-1 dcredit=-1 maxrepeat=3 reject_username difok=7 enforce_for_root/g"
-
-# Monitoringの設定
-touch /usr/local/bin/monitoring.sh
-cat > /usr/local/bin/monitoring.sh << 'EOF'
-#!/bin/bash
-
 # OSのアーキテクチャを取得する
 OS_ARCHITECTURE=$(uname -m)
 # OSのカーネルのバージョンを取得する
@@ -98,7 +57,4 @@ echo "#Connections TCP : ${CONNECT_ACTIVE} ESTABLISHED"
 echo "#User log: ${USE_USER_COUNT}"
 echo "#Network: ${IPV4_MAC_INFO}"
 echo "#Sudo : ${SUDO_COUNT} cmd"
-EOF
 
-# 定期実行を設定する
-echo "*/10 * * * * bash /usr/local/bin/monitoring.sh" | crontab -
