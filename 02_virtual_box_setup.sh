@@ -1,18 +1,19 @@
 #!/bin/bash
 # 仮想マシンの名前
 VM_NAME="Born2beroot"
+# 保存ディレクトリパス
+VM_DIRECTORY="$(dirname $(realpath ${0}))"
 # ストレージコントローラーの名前
 STORAGE_CONTROLLER_NAME="SATA Controller"
 # VDIファイルのパス
-VID_NAME="./vdi/born2beroot.vdi"
+VID_NAME="${VM_DIRECTORY}/${VM_NAME}/born2beroot.vdi"
 # VDIのサイズ（MB単位）
 VID_SIZE="5120"
 # メモリのサイズ（MB単位）
 MEMORY_SIZE="1024"
 # CPUのスレッド数
 CPUS="1"
-# 保存ディレクトリパス
-VM_DIRECTORY="$(dirname $(realpath ${0}))/virtual"
+
 
 # 仮想マシンの削除
 echo "Delete virtual machine"
@@ -45,5 +46,9 @@ VBoxManage modifyvm "${VM_NAME}" --memory ${MEMORY_SIZE}
 # CPUのスレッド数の設定
 echo "Set CPU threads"
 VBoxManage modifyvm "${VM_NAME}" --cpus ${CPUS}
+
+# ネットワーク設定
+echo "Set network"
+VBoxManage modifyvm "${VM_NAME}" --natpf1 "42tokyo,tcp,,4242,,4242"
 
 echo "Virtual machine setup completed"
