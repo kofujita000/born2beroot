@@ -34,7 +34,7 @@ sudo ufw status numbered
 # パスワードポリシの設定
 sed -ie "s/PASS_MAX_DAYS/PASS_MAX_DAYS\t30/g" /etc/login.defs
 sed -ie "s/PASS_MIN_DAYS/PASS_MIN_DAYS\t2/g" /etc/login.defs
-sed -ie "s/^password\trequisite/password\trequisite\t\t\tpam_pwquality.so retry=3 minlen=10 ucredit=-1 dcredit=-1 maxrepeat=3 reject_username difok=7 enforce_for_root/g"
+sed -ie "s/^password\trequisite/password\trequisite\t\t\tpam_pwquality.so retry=3 minlen=10 ucredit=-1 dcredit=-1 maxrepeat=3 reject_username difok=7 enforce_for_root/g" /etc/login.defs
 
 # Monitoringの設定
 touch /usr/local/bin/monitoring.sh
